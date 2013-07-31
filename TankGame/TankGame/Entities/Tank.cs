@@ -41,12 +41,12 @@ namespace TankGame.Entities
             Points = points;
             Shot = shot;
         }
-        public new void Draw(SpriteBatch spriteBatch, int orgx, int orgy)
+        public new void Draw(SpriteBatch spriteBatch, int orgx, int orgy, Color tint)
         {
             int x = orgx + Size / 2 + (int)Position.X * Size;
             int y = orgy + Size / 2 + (int)Position.Y * Size;
             float rot = (float)Math.Atan2(Direction.Y, Direction.X) + (float)Math.PI / 2;
-            spriteBatch.Draw(Brick.texture, new Rectangle(x, y, Size, Size), this.TextureSrc, Color.White,rot,new Vector2(32,32),SpriteEffects.None,1);
+            spriteBatch.Draw(Brick.texture, new Rectangle(x, y, Size, Size), this.TextureSrc, tint,rot,new Vector2(32,32),SpriteEffects.None,1);
         }
     }
 }
