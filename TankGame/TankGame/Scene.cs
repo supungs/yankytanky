@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using TankGame.Entities;
 using TankGame.AI;
+using System.Runtime.InteropServices;
 
 namespace TankGame
 {
@@ -22,7 +23,8 @@ namespace TankGame
         public Tank Myplayer { get; set; }
         public List<LifePack> LifePacks { get; set; }
         public List<CoinPile> CoinPiles { get; set; }
-        private Color[] plyrColors;
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern uint MessageBox(IntPtr hWnd, String text, String caption, uint type);
         int size=45,originx=10,originy=10;
         Decoder dec;
         Communicator com;
@@ -33,13 +35,13 @@ namespace TankGame
         {
             dec = new Decoder(this, size);
             com = new Communicator("127.0.0.1", 6000, 7000);
-            plyrColors = new Color[5] { Color.OrangeRed, Color.Green, Color.Yellow, Color.Cyan, Color.Magenta };
         }
 
         public void update()
         {
             int result = 0;
             string msg = com.listen();
+            //try changing return type of dec.decode to string and handle this...
             if (msg != "")
             {
                 lastmsg = msg;
@@ -55,6 +57,20 @@ namespace TankGame
                Vector2 dir= ai.getBestDirection(Bricks,Stones, Myplayer,Tanks, CoinPiles, LifePacks);
                com.send(dec.decodeDir(dir)+"#");
             }
+            else if(result==6){
+                MessageBox(new IntPtr(0), "player full", "Error", 0);
+
+            }
+            else if (result == 7)
+            {
+                MessageBox(new IntPtr(0), "already added", "Error", 0);
+
+            }
+            else if (result == 8)
+            {
+                MessageBox(new IntPtr(0), "game already started", "Error", 0);
+
+            }
         }
 
         public void joinServer()
@@ -66,6 +82,7 @@ namespace TankGame
         {
             sfont1 = Content.Load<SpriteFont>("sFont1");
             Entity.LoadTexture(Content);
+            
         }
 
         public void draw(SpriteBatch spriteBatch)
@@ -96,17 +113,11 @@ namespace TankGame
                     cpl.Draw(spriteBatch, originx, originy);
 
             if (Tanks != null)
-                for (int i = 0; i < 5; i++)
+                foreach (Tank tnk in Tanks)
                 {
-                    Tank tnk = Tanks[i];
                     if (tnk == null) continue;
-                    Random rnd = new Random();
-                    tnk.Draw(spriteBatch, originx, originy, plyrColors[i]);
+                    tnk.Draw(spriteBatch, originx, originy);
                 }
-                //foreach (Tank tnk in Tanks)
-                //{
-
-                //}
         }
 
         public void drawGround(SpriteBatch spriteBatch)
