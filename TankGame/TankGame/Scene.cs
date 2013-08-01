@@ -23,7 +23,7 @@ namespace TankGame
         public Tank Myplayer { get; set; }
         public List<LifePack> LifePacks { get; set; }
         public List<CoinPile> CoinPiles { get; set; }
-        private Color[] plyrColors;
+        SpriteFont font;
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern uint MessageBox(IntPtr hWnd, String text, String caption, uint type);
         int size=45,originx=10,originy=10;
@@ -36,7 +36,6 @@ namespace TankGame
         {
             dec = new Decoder(this, size);
             com = new Communicator("127.0.0.1", 6000, 7000);
-            plyrColors = new Color[5] { Color.OrangeRed, Color.Green, Color.Yellow, Color.Cyan, Color.Magenta };
         }
 
         public void update()
@@ -84,7 +83,7 @@ namespace TankGame
         {
             sfont1 = Content.Load<SpriteFont>("sFont1");
             Entity.LoadTexture(Content);
-            
+            font = Content.Load<SpriteFont>("MyFont");
         }
 
         public void draw(SpriteBatch spriteBatch)
@@ -115,13 +114,30 @@ namespace TankGame
                     cpl.Draw(spriteBatch, originx, originy);
 
             if (Tanks != null)
-                for (int i = 0; i < 5; i++)
+                foreach (Tank tnk in Tanks)
                 {
-                    Tank tnk = Tanks[i];
                     if (tnk == null) continue;
-                    Random rnd = new Random();
-                    tnk.Draw(spriteBatch, originx, originy, plyrColors[i]);
+                    tnk.Draw(spriteBatch, originx, originy);
                 }
+            spriteBatch.DrawString(font, "Player ", new Vector2(500, 265), Color.GreenYellow);
+            spriteBatch.DrawString(font, "Points ", new Vector2(590, 265), Color.GreenYellow);
+            spriteBatch.DrawString(font, "Coins ", new Vector2(680, 265), Color.GreenYellow);
+            if (Myplayer != null)
+            {
+                spriteBatch.DrawString(font, "MyPlayer", new Vector2(490, 290), Color.White);
+                spriteBatch.DrawString(font,  this.Myplayer.Points.ToString(), new Vector2(590, 290), Color.White);
+                spriteBatch.DrawString(font,  this.Myplayer.Coins.ToString(), new Vector2(680, 290), Color.White);                
+            }
+            if (Tanks != null)
+            {
+              for (int i = 1; i < Tanks.Length; i++)
+                {
+                    if (Tanks[i] == null) continue;
+                    spriteBatch.DrawString(font, "Player"+i, new Vector2(490, 315+25*i), Color.White);
+                    spriteBatch.DrawString(font, this.Tanks[i].Points.ToString(), new Vector2(590, 315 + 25 * i), Color.White);
+                    spriteBatch.DrawString(font, this.Myplayer.Coins.ToString(), new Vector2(680, 315 + 25 * i), Color.White);  
+                }
+            }
         }
 
         public void drawGround(SpriteBatch spriteBatch)
