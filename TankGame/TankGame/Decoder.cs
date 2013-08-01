@@ -17,7 +17,7 @@ namespace TankGame
 
         Scene mainscn;
         int size;
-
+        int myplayernum;
         public Decoder(Scene scn, int size)
         {
             mainscn = scn;
@@ -60,6 +60,9 @@ namespace TankGame
 
         private void decodeInit(string[] tokens)
         {
+            string pname = tokens[1];
+            myplayernum = int.Parse(pname.Substring(1));
+
             Vector3[] brks = decodeXYZ(tokens[2], 0);
             Vector2[] stn = decodeXY(tokens[3]);
             Vector2[] wtr = decodeXY(tokens[4]);
@@ -82,12 +85,16 @@ namespace TankGame
         private void decodePlayer(string[] tokens)
         {
             mainscn.Tanks = new Tank[5];
-            string pname = tokens[1];
-            int i = int.Parse(pname.Substring(1));
-            int dir = int.Parse(tokens[3].TrimEnd(new char[] { '#' }));
+            for (int i = 0; i < 5; i++)
+            {
+                if ((tokens.Length-1)/3 == i) break;
+                string pname = tokens[i*3+1];
+                int myplayernum = int.Parse(pname.Substring(1));
+                int dir = int.Parse(tokens[i * 3+3].TrimEnd(new char[] { '#' }));
+                mainscn.Tanks[i] = new Tank(pname, decodeXY(tokens[i * 3+2])[0], new Vector2((2 - dir) % 2, (dir - 1) % 2), size);
+            }
 
-            mainscn.Tanks[i] = new Tank(pname, decodeXY(tokens[2])[0], new Vector2((2 - dir) % 2, (dir - 1) % 2), size);
-            mainscn.Myplayer = mainscn.Tanks[i];
+            mainscn.Myplayer = mainscn.Tanks[this.myplayernum];
         }
 
         private void decodeUpdate(string[] tokens)
@@ -106,6 +113,12 @@ namespace TankGame
                 int dir = int.Parse(player[2]);
                 p.update(player[0], decodeXY(player[1])[0], new Vector2((2 - dir) % 2, (dir - 1) % 2),
                     int.Parse(player[4]), int.Parse(player[5]), int.Parse(player[6]), player[3].Equals("1"));
+                if (p.Health == 0 && !p.Dead)
+                {
+                    p.Dead = true;
+                    CoinPile coinpile = new CoinPile(p.Position, 100, p.Coins, size);
+                    mainscn.CoinPiles.Add(coinpile);
+                }
             }
 
             Vector3[] brks = decodeXYZ(tokens[pcount+1], 4);
@@ -117,13 +130,13 @@ namespace TankGame
 
         private void decodeCoins(string[] tokens)
         {
-            CoinPile coin = new CoinPile(decodeXY(tokens[1])[0],int.Parse(tokens[2]),int.Parse(tokens[3].TrimEnd(new char[] { '#' })),size);
+            CoinPile coin = new CoinPile(decodeXY(tokens[1])[0],int.Parse(tokens[2])/1000,int.Parse(tokens[3].TrimEnd(new char[] { '#' })),size);
             mainscn.CoinPiles.Add(coin);
         }
 
         private void decodeLifePack(string[] tokens)
         {
-            LifePack lifePack = new LifePack(decodeXY(tokens[1])[0],int.Parse(tokens[2].TrimEnd(new char[] { '#' })),size);
+            LifePack lifePack = new LifePack(decodeXY(tokens[1])[0], int.Parse(tokens[2].TrimEnd(new char[] { '#' })) / 1000, size);
             mainscn.LifePacks.Add(lifePack);
         }
 
@@ -180,7 +193,7 @@ namespace TankGame
 
             // reduce coins life
             if (mainscn.CoinPiles != null)
-                foreach (CoinPile cpl in mainscn.CoinPiles)
+                foreach (CoinPile cpl in mainscn.CoinPiles.ToList())
                 {
                     if (cpl.Life == 0)
                         mainscn.CoinPiles.Remove(cpl);
@@ -189,7 +202,7 @@ namespace TankGame
                 }
             // reduce Lifepack life
             if (mainscn.LifePacks != null)
-                foreach (LifePack lpk in mainscn.LifePacks)
+                foreach (LifePack lpk in mainscn.LifePacks.ToList())
                 {
                     if (lpk.Life == 0)
                         mainscn.LifePacks.Remove(lpk);

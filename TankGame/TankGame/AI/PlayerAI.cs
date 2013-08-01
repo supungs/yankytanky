@@ -32,7 +32,9 @@ namespace TankGame.AI
                 brks[i].Y = bricks[i].Position.Y;
                 brks[i].Z = 4-bricks[i].Damage;
             }
-            Vector3[] goals = new Vector3[coins.Count + lifes.Count];
+            int goalslen = coins.Count;
+            if (myplayer.Health < 100) goalslen = coins.Count + lifes.Count;
+            Vector3[] goals = new Vector3[goalslen];
 
             for (int j = 0; j < coins.Count; j++)
             {
@@ -40,13 +42,15 @@ namespace TankGame.AI
                 goals[j].Y = coins[j].Position.Y;
                 goals[j].Z = coins[j].Value;
             }
-            for (int j = 0; j < lifes.Count; j++)
+            if (myplayer.Health < 100)
             {
-                goals[coins.Count + j].X = lifes[j].Position.X;
-                goals[coins.Count + j].Y = lifes[j].Position.Y;
-                goals[coins.Count + j].Z = 1000;
+                for (int j = 0; j < lifes.Count; j++)
+                {
+                    goals[coins.Count + j].X = lifes[j].Position.X;
+                    goals[coins.Count + j].Y = lifes[j].Position.Y;
+                    goals[coins.Count + j].Z = 1000;
+                }
             }
-
             return pathFinder.getNextDirection(brks,myplayer.Position,myplayer.Direction,goals);
         }
 
@@ -54,12 +58,15 @@ namespace TankGame.AI
         {
             Vector3 greedyDir=getGreedyDirection(bricks, myplayer, coins, lifes);
             Vector3 fightDir = getFightDirection(bricks, stones, myplayer, tanks);
-            if ( fightDir.Z>0)
-                return new Vector2(0, 0);
+            //if ( fightDir.Z>0)
+            //    return new Vector2(0, 0);
+
+            Vector2 move;
             if(greedyDir.Z>=fightDir.Z)
-                return new Vector2(greedyDir.X, greedyDir.Y);
+                move= new Vector2(greedyDir.X, greedyDir.Y);
             else
-                return new Vector2(0, 0);
+                move= new Vector2(0, 0);
+            return move;
         }
 
         public Vector3 getFightDirection( Brick[] bricks, Stone[] stones,Tank myplayer, Tank[] tanks)
@@ -95,7 +102,7 @@ namespace TankGame.AI
             {
                 Tank t = tanks[map[(int)cell.X, (int)cell.Y]-5];
                 if (t.Health>0)
-                profit = (int)(t.Coins/t.Health *2.5);
+                profit = (int)(t.Coins/t.Health);
             }
             return new Vector3(0, 0, profit);
         }

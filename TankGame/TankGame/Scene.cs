@@ -23,6 +23,7 @@ namespace TankGame
         public Tank Myplayer { get; set; }
         public List<LifePack> LifePacks { get; set; }
         public List<CoinPile> CoinPiles { get; set; }
+        private Color[] plyrColors;
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern uint MessageBox(IntPtr hWnd, String text, String caption, uint type);
         int size=45,originx=10,originy=10;
@@ -35,6 +36,7 @@ namespace TankGame
         {
             dec = new Decoder(this, size);
             com = new Communicator("127.0.0.1", 6000, 7000);
+            plyrColors = new Color[5] { Color.OrangeRed, Color.Green, Color.Yellow, Color.Cyan, Color.Magenta };
         }
 
         public void update()
@@ -113,10 +115,12 @@ namespace TankGame
                     cpl.Draw(spriteBatch, originx, originy);
 
             if (Tanks != null)
-                foreach (Tank tnk in Tanks)
+                for (int i = 0; i < 5; i++)
                 {
+                    Tank tnk = Tanks[i];
                     if (tnk == null) continue;
-                    tnk.Draw(spriteBatch, originx, originy);
+                    Random rnd = new Random();
+                    tnk.Draw(spriteBatch, originx, originy, plyrColors[i]);
                 }
         }
 

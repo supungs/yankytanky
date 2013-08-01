@@ -18,6 +18,7 @@ namespace TankGame.Entities
         public int Coins { get; set; }
         public int Points { get; set; }
         public bool Shot { get; set; }
+        public bool Dead { get; set; }
         public Vector2 Direction { get; set; }
 
         public Tank(string name, Vector2 pos, Vector2 dir,int size): base(pos,size)
@@ -43,10 +44,13 @@ namespace TankGame.Entities
         }
         public new void Draw(SpriteBatch spriteBatch, int orgx, int orgy, Color tint)
         {
-            int x = orgx + Size / 2 + (int)Position.X * Size;
-            int y = orgy + Size / 2 + (int)Position.Y * Size;
-            float rot = (float)Math.Atan2(Direction.Y, Direction.X) + (float)Math.PI / 2;
-            spriteBatch.Draw(Brick.texture, new Rectangle(x, y, Size, Size), this.TextureSrc, tint,rot,new Vector2(32,32),SpriteEffects.None,1);
+            if (Health > 0)
+            {
+                int x = orgx + Size / 2 + (int)Position.X * Size;
+                int y = orgy + Size / 2 + (int)Position.Y * Size;
+                float rot = (float)Math.Atan2(Direction.Y, Direction.X) + (float)Math.PI / 2;
+                spriteBatch.Draw(Brick.texture, new Rectangle(x, y, Size, Size), this.TextureSrc, tint, rot, new Vector2(32, 32), SpriteEffects.None, 1);
+            }
         }
     }
 }

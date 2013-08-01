@@ -56,7 +56,13 @@ namespace TankGame.AI
             scell.dir = startdir;
 
             SimulateAStar();
-            return AStarMove();
+            Vector3 move= AStarMove();
+            if (asgrid[(int)(startpos.X + move.X), (int)(startpos.Y + move.Y)].cost > 1)
+            {
+                move.X = 0;
+                move.Y = 0;
+            }
+            return move;
         }
 
 
